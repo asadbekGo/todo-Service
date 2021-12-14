@@ -153,9 +153,7 @@ func (r *todoRepo) ListOverdue(time time.Time) ([]*pb.Todo, error) {
 	}
 	defer rows.Close() // nolint:errcheck
 
-	var (
-		todos []*pb.Todo
-	)
+	var todos []*pb.Todo
 
 	for rows.Next() {
 		var todo pb.Todo
