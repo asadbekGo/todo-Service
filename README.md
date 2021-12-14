@@ -1,2 +1,2 @@
-# todo-service
-To do gRPC service implement
+# todo-Service
+To do Service implementation
