@@ -141,19 +141,24 @@ func (r *todoRepo) Delete(id int64) error {
 	return nil
 }
 
-func (r *todoRepo) ListOverdue(time time.Time) ([]*pb.Todo, error) {
+func (r *todoRepo) ListOverdue(time time.Time, page, limit int64) ([]*pb.Todo, int64, error) {
+	offset := (page - 1) * limit
+
 	rows, err := r.db.Queryx(`
 		SELECT id, assignee, title, summary, deadline, status FROM todos
-		WHERE deadline > $1`, time)
+		WHERE deadline > $1 LIMIT $2 OFFSET $3`, time, limit, offset)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 	if err = rows.Err(); err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 	defer rows.Close() // nolint:errcheck
 
-	var todos []*pb.Todo
+	var (
+		todos []*pb.Todo
+		count int64
+	)
 
 	for rows.Next() {
 		var todo pb.Todo
@@ -167,11 +172,17 @@ func (r *todoRepo) ListOverdue(time time.Time) ([]*pb.Todo, error) {
 			&todo.Deadline,
 		)
 		if err != nil {
-			return nil, err
+			return nil, 0, err
 		}
 
 		todos = append(todos, &todo)
 	}
 
-	return todos, nil
+	err = r.db.QueryRow(`SELECT count(*) FROM todos`).Scan(&count)
+
+	if err != nil {
+		return nil, 0, err
+	}
+
+	return todos, count, nil
 }

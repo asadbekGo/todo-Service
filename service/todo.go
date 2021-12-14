@@ -2,10 +2,8 @@ package service
 
 import (
 	"context"
-	"fmt"
 	"time"
 
-	"github.com/jmoiron/sqlx"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
@@ -21,9 +19,9 @@ type TodoService struct {
 }
 
 // NewTodoService ...
-func NewTodoService(db *sqlx.DB, log l.Logger) *TodoService {
+func NewTodoService(storage storage.IStorage, log l.Logger) *TodoService {
 	return &TodoService{
-		storage: storage.NewStoragePg(db),
+		storage: storage,
 		logger:  log,
 	}
 }
@@ -81,20 +79,20 @@ func (s *TodoService) Delete(ctx context.Context, req *pb.ByIdReq) (*pb.Empty, e
 	return &pb.Empty{}, nil
 }
 
-func (s *TodoService) ListOverdue(ctx context.Context, req *pb.Time) (*pb.ListOverdueResp, error) {
+func (s *TodoService) ListOverdue(ctx context.Context, req *pb.ListTime) (*pb.ListResp, error) {
 	layoutISO := "2006-01-02"
 	time, err := time.Parse(layoutISO, req.ToTime)
-	fmt.Println(time)
 	if err != nil {
 		s.logger.Error("failed to time parse", l.Error(err))
 	}
-	todos, err := s.storage.Todo().ListOverdue(time)
+	todos, count, err := s.storage.Todo().ListOverdue(time, req.ListPage.Page, req.ListPage.Limit)
 	if err != nil {
 		s.logger.Error("failed to list overdue todo", l.Error(err))
 		return nil, status.Error(codes.Internal, "failed to list overdue todo")
 	}
 
-	return &pb.ListOverdueResp{
+	return &pb.ListResp{
 		Todos: todos,
+		Count: count,
 	}, nil
 }

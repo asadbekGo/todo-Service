@@ -11,6 +11,7 @@ import (
 	"github.com/asadbekGo/todo-service/pkg/db"
 	"github.com/asadbekGo/todo-service/pkg/logger"
 	"github.com/asadbekGo/todo-service/service"
+	"github.com/asadbekGo/todo-service/storage"
 )
 
 func main() {
@@ -34,7 +35,9 @@ func main() {
 		log.Fatal("sqlx connection to postgres error", logger.Error(err))
 	}
 
-	todoService := service.NewTodoService(connDB, log)
+	pgStorage := storage.NewStoragePg(connDB)
+
+	todoService := service.NewTodoService(pgStorage, log)
 
 	lis, err := net.Listen("tcp", cfg.RPCPort)
 	if err != nil {
