@@ -168,8 +168,8 @@ func (r *todoRepo) ListOverdue(time time.Time, page, limit int64) ([]*pb.Todo, i
 			&todo.Assignee,
 			&todo.Title,
 			&todo.Summary,
-			&todo.Status,
 			&todo.Deadline,
+			&todo.Status,
 		)
 		if err != nil {
 			return nil, 0, err
