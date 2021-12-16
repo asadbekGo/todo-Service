@@ -205,7 +205,7 @@ func TestTodoRepo_Delete(t *testing.T) {
 	}{
 		{
 			name:    "successful",
-			input:   3,
+			input:   2,
 			want:    nil,
 			wantErr: false,
 		},
@@ -216,9 +216,6 @@ func TestTodoRepo_Delete(t *testing.T) {
 			err := pgRepo.Delete(tc.input)
 			if err != nil {
 				t.Fatalf("%s: expected: %v, got: %v", tc.name, tc.wantErr, err)
-			}
-			if tc.want == err {
-				t.Fatalf("%s: expected: %v, got: %v", tc.name, tc.want, err)
 			}
 		})
 	}
