@@ -4,6 +4,9 @@ create table todos (
     title varchar(28) not null,
     summary varchar(28) not null,
     deadline timestamp not null,
-    status varchar(24) not null
+    status varchar(24) not null,
+    created_at timestamp default current_timestamp,
+    updated_at timestamp,
+    deleted_at timestamp
 );
 

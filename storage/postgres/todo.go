@@ -47,7 +47,7 @@ func (r *todoRepo) Get(id int64) (pb.Todo, error) {
 
 	err := r.db.QueryRow(`
 		SELECT id, assignee, title, summary, deadline, status FROM todos 
-		WHERE id=$1`, id).Scan(
+		WHERE id=$1 and deleted_at is null`, id).Scan(
 		&todo.Id,
 		&todo.Assignee,
 		&todo.Title,
@@ -67,6 +67,7 @@ func (r *todoRepo) List(page, limit int64) ([]*pb.Todo, int64, error) {
 
 	rows, err := r.db.Queryx(`
 		SELECT id, assignee, title, summary, deadline, status FROM todos
+		WHERE deleted_at is null
 		LIMIT $1 OFFSET $2`, limit, offset)
 	if err != nil {
 		return nil, 0, err
@@ -98,7 +99,7 @@ func (r *todoRepo) List(page, limit int64) ([]*pb.Todo, int64, error) {
 		todos = append(todos, &todo)
 	}
 
-	err = r.db.QueryRow(`SELECT count(*) FROM todos`).Scan(&count)
+	err = r.db.QueryRow(`SELECT count(*) FROM todos WHERE deleted_at is null`).Scan(&count)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -108,8 +109,8 @@ func (r *todoRepo) List(page, limit int64) ([]*pb.Todo, int64, error) {
 
 func (r *todoRepo) Update(todo pb.Todo) (pb.Todo, error) {
 	result, err := r.db.Exec(`
-		UPDATE todos SET assignee=$1, title=$2, summary=$3, status=$4, deadline=$5
-		WHERE id=$6`,
+		UPDATE todos SET assignee=$1, title=$2, summary=$3, status=$4, deadline=$5, updated_at=current_timestamp
+		WHERE id=$6 and deleted_at is null`,
 		todo.Assignee, todo.Title,
 		todo.Summary, todo.Status,
 		todo.Deadline, todo.Id)
@@ -130,7 +131,7 @@ func (r *todoRepo) Update(todo pb.Todo) (pb.Todo, error) {
 
 func (r *todoRepo) Delete(id int64) error {
 	result, err := r.db.Exec(`
-		DELETE FROM todos WHERE id=$1`, id)
+		UPDATE todos SET deleted_at=current_timestamp WHERE id=$1`, id)
 	if err != nil {
 		return err
 	}
@@ -146,7 +147,7 @@ func (r *todoRepo) ListOverdue(time time.Time, page, limit int64) ([]*pb.Todo, i
 
 	rows, err := r.db.Queryx(`
 		SELECT id, assignee, title, summary, deadline, status FROM todos
-		WHERE deadline > $1 LIMIT $2 OFFSET $3`, time, limit, offset)
+		WHERE deadline > $1 and deleted_at is null LIMIT $2 OFFSET $3`, time, limit, offset)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -179,7 +180,7 @@ func (r *todoRepo) ListOverdue(time time.Time, page, limit int64) ([]*pb.Todo, i
 	}
 
 	err = r.db.QueryRow(`
-		SELECT count(*) FROM todos WHERE deadline > $1 LIMIT $2 OFFSET $3`,
+		SELECT count(*) FROM todos WHERE deadline > $1 and deleted_at is null LIMIT $2 OFFSET $3`,
 		time, limit, offset).Scan(&count)
 
 	if err != nil {
