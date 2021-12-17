@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/gofrs/uuid"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
@@ -27,6 +28,13 @@ func NewTodoService(storage storage.IStorage, log l.Logger) *TodoService {
 }
 
 func (s *TodoService) Create(ctx context.Context, req *pb.Todo) (*pb.Todo, error) {
+	id, err := uuid.NewV4()
+	if err != nil {
+		s.logger.Error("failed while generating uuid", l.Error(err))
+		return nil, status.Error(codes.Internal, "failed generate uuid")
+	}
+	req.Id = id.String()
+
 	user, err := s.storage.Todo().Create(*req)
 	if err != nil {
 		s.logger.Error("falied to create todo", l.Error(err))

@@ -18,6 +18,7 @@ func TestTodoRepo_Create(t *testing.T) {
 		{
 			name: "successful",
 			input: pb.Todo{
+				Id:       "908b32e7-160f-4e6c-be3c-b1637a240b96",
 				Assignee: "asadbek",
 				Title:    "todo service",
 				Summary:  "rpc implement",
@@ -25,6 +26,7 @@ func TestTodoRepo_Create(t *testing.T) {
 				Status:   "active",
 			},
 			want: pb.Todo{
+				Id:       "908b32e7-160f-4e6c-be3c-b1637a240b96",
 				Assignee: "asadbek",
 				Title:    "todo service",
 				Summary:  "rpc implement",
@@ -36,6 +38,7 @@ func TestTodoRepo_Create(t *testing.T) {
 		{
 			name: "successful",
 			input: pb.Todo{
+				Id:       "acfa43a9-1166-4d88-a0e4-96490a77b8b8",
 				Assignee: "muhammad",
 				Title:    "API gateway",
 				Summary:  "restfull ",
@@ -43,6 +46,7 @@ func TestTodoRepo_Create(t *testing.T) {
 				Status:   "active",
 			},
 			want: pb.Todo{
+				Id:       "acfa43a9-1166-4d88-a0e4-96490a77b8b8",
 				Assignee: "muhammad",
 				Title:    "API gateway",
 				Summary:  "restfull ",
@@ -59,7 +63,6 @@ func TestTodoRepo_Create(t *testing.T) {
 			if err != nil {
 				t.Fatalf("%s: expected: %v, got: %v", tc.name, tc.wantErr, err)
 			}
-			got.Id = 0
 			if !reflect.DeepEqual(tc.want, got) {
 				t.Fatalf("%s: expected: %v, got: %v", tc.name, tc.want, got)
 			}
@@ -70,15 +73,15 @@ func TestTodoRepo_Create(t *testing.T) {
 func TestTodoRepo_Get(t *testing.T) {
 	tests := []struct {
 		name    string
-		input   int64
+		input   string
 		want    pb.Todo
 		wantErr bool
 	}{
 		{
 			name:  "successful",
-			input: 1,
+			input: "908b32e7-160f-4e6c-be3c-b1637a240b96",
 			want: pb.Todo{
-				Id:       1,
+				Id:       "908b32e7-160f-4e6c-be3c-b1637a240b96",
 				Assignee: "asadbek",
 				Title:    "todo service",
 				Summary:  "rpc implement",
@@ -121,7 +124,7 @@ func TestTodoRepo_List(t *testing.T) {
 			},
 			want: []*pb.Todo{
 				{
-					Id:       1,
+					Id:       "908b32e7-160f-4e6c-be3c-b1637a240b96",
 					Assignee: "asadbek",
 					Title:    "todo service",
 					Summary:  "rpc implement",
@@ -129,7 +132,7 @@ func TestTodoRepo_List(t *testing.T) {
 					Status:   "active",
 				},
 				{
-					Id:       2,
+					Id:       "acfa43a9-1166-4d88-a0e4-96490a77b8b8",
 					Assignee: "muhammad",
 					Title:    "API gateway",
 					Summary:  "restfull ",
@@ -164,7 +167,7 @@ func TestTodoRepo_Update(t *testing.T) {
 		{
 			name: "successful",
 			input: pb.Todo{
-				Id:       1,
+				Id:       "908b32e7-160f-4e6c-be3c-b1637a240b96",
 				Assignee: "asadbek",
 				Title:    "todo service",
 				Summary:  "rpc implement",
@@ -188,7 +191,7 @@ func TestTodoRepo_Update(t *testing.T) {
 			if err != nil {
 				t.Fatalf("%s: expected: %v, got: %v", tc.name, tc.wantErr, err)
 			}
-			got.Id = 0
+			got.Id = ""
 			if !reflect.DeepEqual(tc.want, got) {
 				t.Fatalf("%s: expected: %v, got: %v", tc.name, tc.want, got)
 			}
@@ -199,13 +202,13 @@ func TestTodoRepo_Update(t *testing.T) {
 func TestTodoRepo_Delete(t *testing.T) {
 	tests := []struct {
 		name    string
-		input   int64
+		input   string
 		want    error
 		wantErr bool
 	}{
 		{
 			name:    "successful",
-			input:   2,
+			input:   "acfa43a9-1166-4d88-a0e4-96490a77b8b8",
 			want:    nil,
 			wantErr: false,
 		},
@@ -248,7 +251,7 @@ func TestTodoRepo_ListOverdue(t *testing.T) {
 			},
 			want: []*pb.Todo{
 				{
-					Id:       1,
+					Id:       "908b32e7-160f-4e6c-be3c-b1637a240b96",
 					Assignee: "asadbek",
 					Title:    "todo service",
 					Summary:  "rpc implement",
@@ -256,7 +259,7 @@ func TestTodoRepo_ListOverdue(t *testing.T) {
 					Status:   "active",
 				},
 				{
-					Id:       2,
+					Id:       "acfa43a9-1166-4d88-a0e4-96490a77b8b8",
 					Assignee: "muhammad",
 					Title:    "API gateway",
 					Summary:  "restfull ",

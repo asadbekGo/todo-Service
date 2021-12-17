@@ -19,15 +19,17 @@ func NewTodoRepo(db *sqlx.DB) *todoRepo {
 }
 
 func (r *todoRepo) Create(todo pb.Todo) (pb.Todo, error) {
-	var id int64
+	var id string
 	err := r.db.QueryRow(`
-		INSERT INTO todos(assignee, title, summary, deadline, status)
-		VALUES ($1, $2, $3, $4, $5) returning id`,
+		INSERT INTO todos(id, assignee, title, summary, deadline, status, updated_at)
+		VALUES ($1, $2, $3, $4, $5, $6, $7) returning id`,
+		todo.Id,
 		todo.Assignee,
 		todo.Title,
 		todo.Summary,
 		todo.Deadline,
 		todo.Status,
+		time.Now().UTC(),
 	).Scan(&id)
 	if err != nil {
 		return pb.Todo{}, err
@@ -42,11 +44,11 @@ func (r *todoRepo) Create(todo pb.Todo) (pb.Todo, error) {
 	return todo, nil
 }
 
-func (r *todoRepo) Get(id int64) (pb.Todo, error) {
+func (r *todoRepo) Get(id string) (pb.Todo, error) {
 	var todo pb.Todo
-
 	err := r.db.QueryRow(`
-		SELECT id, assignee, title, summary, deadline, status FROM todos 
+		SELECT id, assignee, title, summary, deadline, status, created_at, updated_at
+		FROM todos 
 		WHERE id=$1 and deleted_at is null`, id).Scan(
 		&todo.Id,
 		&todo.Assignee,
@@ -54,6 +56,8 @@ func (r *todoRepo) Get(id int64) (pb.Todo, error) {
 		&todo.Summary,
 		&todo.Deadline,
 		&todo.Status,
+		&todo.CreatedAt,
+		&todo.UpdatedAt,
 	)
 	if err != nil {
 		return pb.Todo{}, err
@@ -109,11 +113,11 @@ func (r *todoRepo) List(page, limit int64) ([]*pb.Todo, int64, error) {
 
 func (r *todoRepo) Update(todo pb.Todo) (pb.Todo, error) {
 	result, err := r.db.Exec(`
-		UPDATE todos SET assignee=$1, title=$2, summary=$3, status=$4, deadline=$5, updated_at=current_timestamp
-		WHERE id=$6 and deleted_at is null`,
+		UPDATE todos SET assignee=$1, title=$2, summary=$3, status=$4, deadline=$5, updated_at=$6
+		WHERE id=$7 and deleted_at is null`,
 		todo.Assignee, todo.Title,
 		todo.Summary, todo.Status,
-		todo.Deadline, todo.Id)
+		todo.Deadline, time.Now().UTC(), todo.Id)
 	if err != nil {
 		return pb.Todo{}, err
 	}
@@ -129,7 +133,7 @@ func (r *todoRepo) Update(todo pb.Todo) (pb.Todo, error) {
 	return todo, nil
 }
 
-func (r *todoRepo) Delete(id int64) error {
+func (r *todoRepo) Delete(id string) error {
 	result, err := r.db.Exec(`
 		UPDATE todos SET deleted_at=current_timestamp WHERE id=$1`, id)
 	if err != nil {

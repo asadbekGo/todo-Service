@@ -26,3 +26,25 @@ func ConnectionToDB(cfg config.Config) (*sqlx.DB, error) {
 
 	return connDb, nil
 }
+
+func ConnectDBForSuite(cfg config.Config) (*sqlx.DB, func()) {
+	psqlString := fmt.Sprintf(
+		"host=%s user=%s dbname=%s password=%s port=%d sslmode=disable",
+		cfg.PostgresHost,
+		cfg.PostgresUser,
+		cfg.PostgresDatabase,
+		cfg.PostgresPassword,
+		cfg.PostgresPort,
+	)
+
+	connDb, err := sqlx.Connect("postgres", psqlString)
+	if err != nil {
+		panic(err)
+	}
+
+	cleanUpFunc := func() {
+		connDb.Close()
+	}
+
+	return connDb, cleanUpFunc
+}

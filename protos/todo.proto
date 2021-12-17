@@ -14,7 +14,7 @@ service TodoService {
 message Empty {}
 
 message Todo {
-    int64 id = 1;
+    string id = 1;
     string assignee = 2;
     string title = 3;
     string summary = 4;
@@ -25,7 +25,7 @@ message Todo {
 }
 
 message ByIdReq {
-    int64 id = 1;
+    string id = 1;
 }
 
 message ListReq {
