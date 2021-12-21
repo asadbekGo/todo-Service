@@ -74,7 +74,7 @@ func TestTodoService_Get(t *testing.T) {
 	}{
 		{
 			name:  "successful",
-			input: "0a0a2ca4-36ec-455f-97f5-8d2501af9015",
+			input: "73718693-0a2b-41da-ba08-de7bf7940340",
 			want: pb.Todo{
 				Assignee: "asadbek",
 				Title:    "todo service",
@@ -101,14 +101,13 @@ func TestTodoService_Get(t *testing.T) {
 	}
 }
 
-/*
 func TestTodoService_List(t *testing.T) {
 	tests := []struct {
 		name  string
 		input struct {
 			page, limit int64
 		}
-		want []*pb.Todo
+		wants []*pb.Todo
 	}{
 		{
 			name: "succesful",
@@ -118,7 +117,7 @@ func TestTodoService_List(t *testing.T) {
 				page:  1,
 				limit: 2,
 			},
-			want: []*pb.Todo{
+			wants: []*pb.Todo{
 				{
 					Assignee: "asadbek",
 					Title:    "todo service",
@@ -147,136 +146,134 @@ func TestTodoService_List(t *testing.T) {
 			if err != nil {
 				t.Error("failed to list todo", err)
 			}
-			got.Todos
-
+			for i, want := range tc.wants {
+				got.Todos[i].Id = ""
+				want.CreatedAt = got.Todos[i].CreatedAt
+				want.UpdatedAt = got.Todos[i].UpdatedAt
+				if !reflect.DeepEqual(want, got.Todos[i]) {
+					t.Fatalf("%s: expected:%v got:%v", tc.name, want, got.Todos[i])
+				}
+			}
 		})
 	}
 }
-*/
 
-// func TestTodoRepo_Update(t *testing.T) {
-// 	tests := []struct {
-// 		name    string
-// 		input   pb.Todo
-// 		want    pb.Todo
-// 		wantErr bool
-// 	}{
-// 		{
-// 			name: "successful",
-// 			input: pb.Todo{
-// 				Id:       "908b32e7-160f-4e6c-be3c-b1637a240b96",
-// 				Assignee: "asadbek",
-// 				Title:    "todo service",
-// 				Summary:  "rpc implement",
-// 				Deadline: "2021-12-15T00:00:00Z",
-// 				Status:   "active",
-// 			},
-// 			want: pb.Todo{
-// 				Assignee: "asadbek",
-// 				Title:    "todo service",
-// 				Summary:  "rpc implement",
-// 				Deadline: "2021-12-15T00:00:00Z",
-// 				Status:   "active",
-// 			},
-// 			wantErr: false,
-// 		},
-// 	}
+func TestTodoService_Update(t *testing.T) {
+	tests := []struct {
+		name  string
+		input pb.Todo
+		want  pb.Todo
+	}{
+		{
+			name: "successful",
+			input: pb.Todo{
+				Id:       "73718693-0a2b-41da-ba08-de7bf7940340",
+				Assignee: "albert",
+				Title:    "todo service",
+				Summary:  "rpc implement",
+				Deadline: "2021-12-15T00:00:00Z",
+				Status:   "active",
+			},
+			want: pb.Todo{
+				Assignee: "albert",
+				Title:    "todo service",
+				Summary:  "rpc implement",
+				Deadline: "2021-12-15T00:00:00Z",
+				Status:   "active",
+			},
+		},
+	}
 
-// 	for _, tc := range tests {
-// 		t.Run(tc.name, func(t *testing.T) {
-// 			got, err := pgRepo.Update(tc.input)
-// 			if err != nil {
-// 				t.Fatalf("%s: expected: %v, got: %v", tc.name, tc.wantErr, err)
-// 			}
-// 			got.Id = ""
-// 			if !reflect.DeepEqual(tc.want, got) {
-// 				t.Fatalf("%s: expected: %v, got: %v", tc.name, tc.want, got)
-// 			}
-// 		})
-// 	}
-// }
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			got, err := client.Update(context.Background(), &tc.input)
+			if err != nil {
+				t.Error("failed to update todo", err)
+			}
+			got.Id = ""
+			tc.want.CreatedAt = got.CreatedAt
+			tc.want.UpdatedAt = got.UpdatedAt
+			if !reflect.DeepEqual(tc.want, *got) {
+				t.Fatalf("%s: expected:%v got:%v", tc.name, tc.want, got)
+			}
+		})
+	}
+}
 
-// func TestTodoRepo_Delete(t *testing.T) {
-// 	tests := []struct {
-// 		name    string
-// 		input   string
-// 		want    error
-// 		wantErr bool
-// 	}{
-// 		{
-// 			name:    "successful",
-// 			input:   "acfa43a9-1166-4d88-a0e4-96490a77b8b8",
-// 			want:    nil,
-// 			wantErr: false,
-// 		},
-// 	}
+func TestTodoService_Delete(t *testing.T) {
+	tests := []struct {
+		name  string
+		input string
+		want  pb.Empty
+	}{
+		{
+			name:  "successful",
+			input: "73718693-0a2b-41da-ba08-de7bf7940340",
+			want:  pb.Empty{},
+		},
+	}
 
-// 	for _, tc := range tests {
-// 		t.Run(tc.name, func(t *testing.T) {
-// 			err := pgRepo.Delete(tc.input)
-// 			if err != nil {
-// 				t.Fatalf("%s: expected: %v, got: %v", tc.name, tc.wantErr, err)
-// 			}
-// 		})
-// 	}
-// }
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			got, err := client.Delete(context.Background(), &pb.ByIdReq{Id: tc.input})
+			if err != nil {
+				t.Error("failed to delete todo", err)
+			}
+			if !reflect.DeepEqual(tc.want, *got) {
+				t.Fatalf("%s: expected:%v got:%v", tc.name, tc.want, got)
+			}
+		})
+	}
+}
 
-// func TestTodoRepo_ListOverdue(t *testing.T) {
-// 	layoutISO := "2006-01-02"
-// 	toTime, err := time.Parse(layoutISO, "2021-12-10")
-// 	if err != nil {
-// 		t.Fatal("failed to time parse", err)
-// 	}
-// 	tests := []struct {
-// 		name  string
-// 		input struct {
-// 			time        time.Time
-// 			page, limit int64
-// 		}
-// 		want    []*pb.Todo
-// 		wantErr bool
-// 	}{
-// 		{
-// 			name: "succesful",
-// 			input: struct {
-// 				time        time.Time
-// 				page, limit int64
-// 			}{
-// 				time:  toTime,
-// 				page:  1,
-// 				limit: 2,
-// 			},
-// 			want: []*pb.Todo{
-// 				{
-// 					Id:       "908b32e7-160f-4e6c-be3c-b1637a240b96",
-// 					Assignee: "asadbek",
-// 					Title:    "todo service",
-// 					Summary:  "rpc implement",
-// 					Deadline: "2021-12-15T14:12:14Z",
-// 					Status:   "active",
-// 				},
-// 				{
-// 					Id:       "acfa43a9-1166-4d88-a0e4-96490a77b8b8",
-// 					Assignee: "muhammad",
-// 					Title:    "API gateway",
-// 					Summary:  "restfull ",
-// 					Deadline: "2021-12-18T18:00:10Z",
-// 					Status:   "active",
-// 				},
-// 			},
-// 			wantErr: false,
-// 		},
-// 	}
+func TestTodoService_ListOverdue(t *testing.T) {
+	tests := []struct {
+		name  string
+		input *pb.ListTime
+		wants []*pb.Todo
+	}{
+		{
+			name: "succesful",
+			input: &pb.ListTime{
+				ListPage: &pb.ListReq{
+					Page:  1,
+					Limit: 2,
+				},
+				ToTime: "2021-12-04",
+			},
+			wants: []*pb.Todo{
+				{
+					Assignee: "asadbek",
+					Title:    "todo service",
+					Summary:  "rpc implement",
+					Deadline: "2021-12-15T14:12:14Z",
+					Status:   "active",
+				},
+				{
+					Assignee: "muhammad",
+					Title:    "API gateway",
+					Summary:  "restfull ",
+					Deadline: "2021-12-18T18:00:10Z",
+					Status:   "active",
+				},
+			},
+		},
+	}
 
-// 	for _, tc := range tests {
-// 		t.Run(tc.name, func(t *testing.T) {
-// 			got, count, err := pgRepo.ListOverdue(tc.input.time, tc.input.page, tc.input.limit)
-// 			if err != nil {
-// 				t.Fatalf("%s: expected: %v, got: %v, count: %d", tc.name, tc.wantErr, err, count)
-// 			}
-// 			if !reflect.DeepEqual(tc.want, got) {
-// 				t.Fatalf("%s: expected: %v, got: %v, count: %d", tc.name, tc.want, got, count)
-// 			}
-// 		})
-// 	}
-// }
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			got, err := client.ListOverdue(context.Background(), tc.input)
+			if err != nil {
+				t.Error("failed to listOverdue todo", err)
+			}
+			for i, want := range tc.wants {
+				got.Todos[i].Id = ""
+				want.CreatedAt = got.Todos[i].CreatedAt
+				want.UpdatedAt = got.Todos[i].UpdatedAt
+				if !reflect.DeepEqual(want, got.Todos[i]) {
+					t.Fatalf("%s: expected:%v got:%v", tc.name, want, got.Todos[i])
+				}
+			}
+		})
+	}
+}
