@@ -27,7 +27,6 @@ func (suite *TodoRepositorySuite) SetupSuite() {
 // All methods that begin with "Test" are run as tests within a
 // suite
 func (suite *TodoRepositorySuite) TestTodoCRUD() {
-
 	want := pb.Todo{
 		Id:       "908b32e7-160f-4e6c-be3c-b1637a240b96",
 		Assignee: "asadbek",
