@@ -92,6 +92,7 @@ func (s *TodoService) ListOverdue(ctx context.Context, req *pb.ListTime) (*pb.Li
 	time, err := time.Parse(layoutISO, req.ToTime)
 	if err != nil {
 		s.logger.Error("failed to time parse", l.Error(err))
+		return nil, err
 	}
 	todos, count, err := s.storage.Todo().ListOverdue(time, req.ListPage.Page, req.ListPage.Limit)
 	if err != nil {
