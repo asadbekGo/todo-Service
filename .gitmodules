@@ -1,3 +1,3 @@
 [submodule "protos"]
 	path = protos
-	url = ./protos
+	url = git@github.com:asadbekGo/protos.git
