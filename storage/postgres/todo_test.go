@@ -100,6 +100,8 @@ func TestTodoRepo_Get(t *testing.T) {
 			if err != nil {
 				t.Fatalf("%s: expected: %v, got: %v", tc.name, tc.wantErr, err)
 			}
+			tc.want.CreatedAt = got.CreatedAt
+			tc.want.UpdatedAt = got.UpdatedAt
 			if !reflect.DeepEqual(tc.want, got) {
 				t.Fatalf("%s: expected: %v, got: %v", tc.name, tc.want, got)
 			}
@@ -199,6 +201,8 @@ func TestTodoRepo_Update(t *testing.T) {
 				t.Fatalf("%s: expected: %v, got: %v", tc.name, tc.wantErr, err)
 			}
 			got.Id = ""
+			tc.want.CreatedAt = got.CreatedAt
+			tc.want.UpdatedAt = got.UpdatedAt
 			if !reflect.DeepEqual(tc.want, got) {
 				t.Fatalf("%s: expected: %v, got: %v", tc.name, tc.want, got)
 			}
