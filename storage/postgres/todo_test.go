@@ -63,6 +63,8 @@ func TestTodoRepo_Create(t *testing.T) {
 			if err != nil {
 				t.Fatalf("%s: expected: %v, got: %v", tc.name, tc.wantErr, err)
 			}
+			tc.want.CreatedAt = got.CreatedAt
+			tc.want.UpdatedAt = got.UpdatedAt
 			if !reflect.DeepEqual(tc.want, got) {
 				t.Fatalf("%s: expected: %v, got: %v", tc.name, tc.want, got)
 			}
@@ -111,7 +113,7 @@ func TestTodoRepo_List(t *testing.T) {
 		input struct {
 			page, limit int64
 		}
-		want    []*pb.Todo
+		wants   []*pb.Todo
 		wantErr bool
 	}{
 		{
@@ -122,7 +124,7 @@ func TestTodoRepo_List(t *testing.T) {
 				page:  1,
 				limit: 2,
 			},
-			want: []*pb.Todo{
+			wants: []*pb.Todo{
 				{
 					Id:       "908b32e7-160f-4e6c-be3c-b1637a240b96",
 					Assignee: "asadbek",
@@ -150,8 +152,13 @@ func TestTodoRepo_List(t *testing.T) {
 			if err != nil {
 				t.Fatalf("%s: expected: %v, got: %v, count: %d", tc.name, tc.wantErr, err, count)
 			}
-			if !reflect.DeepEqual(tc.want, got) {
-				t.Fatalf("%s: expected: %v, got: %v, count: %d", tc.name, tc.want, got, count)
+
+			for i, want := range tc.wants {
+				want.CreatedAt = got[i].CreatedAt
+				want.UpdatedAt = got[i].UpdatedAt
+				if !reflect.DeepEqual(want, got[i]) {
+					t.Fatalf("%s: expected: %v, got: %v, count: %d", tc.name, tc.wants, got, count)
+				}
 			}
 		})
 	}
@@ -236,7 +243,7 @@ func TestTodoRepo_ListOverdue(t *testing.T) {
 			time        time.Time
 			page, limit int64
 		}
-		want    []*pb.Todo
+		wants   []*pb.Todo
 		wantErr bool
 	}{
 		{
@@ -249,7 +256,7 @@ func TestTodoRepo_ListOverdue(t *testing.T) {
 				page:  1,
 				limit: 2,
 			},
-			want: []*pb.Todo{
+			wants: []*pb.Todo{
 				{
 					Id:       "908b32e7-160f-4e6c-be3c-b1637a240b96",
 					Assignee: "asadbek",
@@ -277,8 +284,12 @@ func TestTodoRepo_ListOverdue(t *testing.T) {
 			if err != nil {
 				t.Fatalf("%s: expected: %v, got: %v, count: %d", tc.name, tc.wantErr, err, count)
 			}
-			if !reflect.DeepEqual(tc.want, got) {
-				t.Fatalf("%s: expected: %v, got: %v, count: %d", tc.name, tc.want, got, count)
+			for i, want := range tc.wants {
+				want.CreatedAt = got[i].CreatedAt
+				want.UpdatedAt = got[i].UpdatedAt
+				if !reflect.DeepEqual(want, got[i]) {
+					t.Fatalf("%s: expected: %v, got: %v, count: %d", tc.name, tc.wants, got, count)
+				}
 			}
 		})
 	}

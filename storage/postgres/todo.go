@@ -70,7 +70,7 @@ func (r *todoRepo) List(page, limit int64) ([]*pb.Todo, int64, error) {
 	offset := (page - 1) * limit
 
 	rows, err := r.db.Queryx(`
-		SELECT id, assignee, title, summary, deadline, status FROM todos
+		SELECT id, assignee, title, summary, deadline, status, created_at, updated_at FROM todos
 		WHERE deleted_at is null
 		LIMIT $1 OFFSET $2`, limit, offset)
 	if err != nil {
@@ -95,6 +95,8 @@ func (r *todoRepo) List(page, limit int64) ([]*pb.Todo, int64, error) {
 			&todo.Summary,
 			&todo.Deadline,
 			&todo.Status,
+			&todo.CreatedAt,
+			&todo.UpdatedAt,
 		)
 		if err != nil {
 			return nil, 0, err
